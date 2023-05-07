@@ -25,10 +25,13 @@ class ContabilidadEventos {
         // correspondiente en un bloque synchronized (exclusión mutua)
         
         // A RELLENAR
-        |
-        |
-        |
-        |
+        if ((facilidad < filas && nivel < columnas) && (facilidad >= 0 && nivel >= 0)) {
+            synchronized (this) {
+                val[facilidad][nivel]++;
+            }
+        }
+
+
     }
 
     // Metodo que devuelve el número de eventos contabilizados para una facilidad y un nivel dados
@@ -39,9 +42,10 @@ class ContabilidadEventos {
        // lo está modificando
 
        // A RELLENAR
-       |
-       |
-       |
+         synchronized (this) {
+              ret = val[facilidad][nivel];
+         }
+         
        return ret;
     }
     

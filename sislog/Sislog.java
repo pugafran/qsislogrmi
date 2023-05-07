@@ -37,7 +37,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 // de eventos para que sean analizados y archivados por los hilos Clasificador
 class ReceptorEventos extends Thread {
     // A RELLENAR el nombre de la cola de RabbitMQ
-    private final static String NOMBRE_COLA_RABBIT; | // A RELLENAR
+    private final static String NOMBRE_COLA_RABBIT = "FranciscoGabrielPL"; // A RELLENAR
     private ArrayBlockingQueue<String> qevent;
 
     // El constructor recibe una referencia a las colas bloqueantes
@@ -50,8 +50,8 @@ class ReceptorEventos extends Thread {
     public void run() {
         // Conectar con rabbitMQ
         // A RELLENAR
-        |
-        |
+        ConnectionFactory factory = new ConnectionFactory(); // Crear conexión con RabbitMQ y canal de comunicación con la cola de mensajes de eventos de la aplicación de registro de eventos de sistema (Sislog)
+        factory.setHost("localhost");
         try {
             Connection connection = factory.newConnection();
             Channel channel = connection.createChannel();
@@ -69,10 +69,11 @@ class ReceptorEventos extends Thread {
                     String evtmsg = new String(body, "UTF-8");
                     System.out.println("ReceptorEventos: Recibido mensaje = " + evtmsg);
                     // A RELLENAR (enviar mensaje a cola interna bloqueante)
-                    |
-                    |
-                    |
-                    |
+                    try {
+                        qevent.put(evtmsg);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
             };
             System.out.println("ReceptorEventos. Esperando llegada de eventos");
@@ -115,15 +116,39 @@ class Clasificador extends Thread {
                 // Si se puede tokenizar correctamente se escribe el mensaje de log en el fichero 
                 // correspondiente y en el formato especificado en el enunciado, y se contabiliza el evento
                 // a través de actev.
-                |
-                |
-                |
-                |
-                |
-                |
-                |
-                |
-                |
+                String evtmsg = cola.take();
+                StringTokenizer st = new StringTokenizer(evtmsg, ":");
+                try {
+                    String fac = st.nextToken();
+                    String level = st.nextToken();
+                    String msg = st.nextToken();
+                    int fac_index = -1;
+                    int level_index = -1;
+                    for (int i = 0; i < fac_names.length; i++) {
+                        if (fac_names[i].equals(fac)) {
+                            fac_index = i;
+                            break;
+                        }
+                    }
+                    for (int i = 0; i < level_names.length; i++) {
+                        if (level_names[i].equals(level)) {
+                            level_index = i;
+                            break;
+                        }
+                    }
+                    if (fac_index == -1 || level_index == -1) {
+                        System.out.println("Clasificador: Error en el mensaje recibido: " + evtmsg);
+                    } else {
+                        String logmsg = String.format("%s %s %s %s", new Date(), fac, level, msg);
+                        System.out.println("Clasificador: " + logmsg);
+                        FileWriter fw = new FileWriter(fac_file_names[fac_index], true);
+                        fw.write(logmsg + "\n");
+                        fw.close();
+                        actev.contabiliza(fac_index, level_index);
+                    }
+                } catch (Exception e) {
+                    System.out.println("Clasificador: Error en el mensaje recibido: " + evtmsg);
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -224,13 +249,11 @@ public class Sislog {
 
         // Creamos el objeto que nos permite llevar la contabilidad de los eventos
         // A RELLENAR
-        |
-        |
+        ContabilidadEventos actev = new ContabilidadEventos(max_facilidades, max_niveles);
         
         // Creamos la cola interna de sincronización entre hilos
         // A RELLENAR
-        |
-        |
+        cola_interna = new ArrayBlockingQueue<String>(tam_cola);
 
         
         // Manager de seguridad para RMI
@@ -241,10 +264,8 @@ public class Sislog {
         try {
             // Arrancar el servidor RMI y registrar el objeto remoto que implementa la interfaz
             // A RELLENAR
-            |
-            |
-            |
-            |
+            Registry registry = LocateRegistry.createRegistry(1099);
+            registry.rebind("Sislog", actev);
             System.out.println("Sislog registrado para RMI");
         } 
         catch (Exception e) {
@@ -255,14 +276,15 @@ public class Sislog {
         // Creamos los hilos clasificadores, guardamos sus referencias en un array y los arrancamos
         clasificadores = new Clasificador[num_workers];
         // A RELLENAR
-        |
-        |
-        |
+        for (int i = 0; i < num_workers; i++) {
+            clasificadores[i] = new Clasificador(actev, cola_interna, facilities_names, level_names, facilities_file_names);
+            clasificadores[i].start();
+        }
 
         // Creamos el hilo receptor de eventos, almacenamos su referencia y lo arrancamos
         // A RELLENAR
-        |
-        |
+        receptor_eventos = new ReceptorEventos(cola_interna);
+        receptor_eventos.start();
         
         // Esperamos a que finalice el hilo receptor de eventos (nunca finalizará, hay que parar con Ctrl+C)
         receptor_eventos.join();

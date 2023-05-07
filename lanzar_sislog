@@ -3,4 +3,4 @@ if [ "$#" -ne 4 ]; then
     exit
 fi
 echo "Lanzando el sislog"
-java -cp clases:clases/rabbitmq-client.jar -Djava.security.policy=policy sislog.Sislog $1 $2 $3 $4 &
+java -cp clases:clases/rabbitmq-client.jar -Djava.security.policy=policy sislog/ContabilidadEventos.java sislog/Sislog.java $1 $2 $3 $4 &
