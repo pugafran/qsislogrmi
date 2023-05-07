@@ -23,6 +23,8 @@ import java.util.Date;
 // Cola bloqueante para comunicar el hilo ReceptorEventos y los hilos Clasificador
 import java.util.concurrent.ArrayBlockingQueue;
 
+import java.util.StringTokenizer;
+
 // ===================================================================
 // Las dos clases siguientes son hilos que se ejecutarán de forma concurrente
 //
@@ -144,7 +146,7 @@ class Clasificador extends Thread {
                         FileWriter fw = new FileWriter(fac_file_names[fac_index], true);
                         fw.write(logmsg + "\n");
                         fw.close();
-                        actev.contabiliza(fac_index, level_index);
+                        actev.contabilizaEvento(fac_index, level_index);
                     }
                 } catch (Exception e) {
                     System.out.println("Clasificador: Error en el mensaje recibido: " + evtmsg);
@@ -264,9 +266,10 @@ public class Sislog {
         try {
             // Arrancar el servidor RMI y registrar el objeto remoto que implementa la interfaz
             // A RELLENAR
-            Registry registry = LocateRegistry.createRegistry(1099);
-            registry.rebind("Sislog", actev);
+            SislogImpl sislog = new SislogImpl(actev, facilities_names, level_names);
+            Naming.rebind("Sislog", sislog);
             System.out.println("Sislog registrado para RMI");
+
         } 
         catch (Exception e) {
             // Cualquier excepción simplemente se imprime y se ignora

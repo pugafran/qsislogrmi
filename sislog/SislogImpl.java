@@ -39,35 +39,31 @@ public class SislogImpl extends UnicastRemoteObject implements SislogInterface {
     @Override
     public int obtenerValorFacilidadNivel(int facilidad,int nivel) throws RemoteException {
         // A RELLENAR
-        |
-        |
+        return accountev.obtenerValorFacilidadNivel(facilidad, nivel);
     }
 
     @Override
     public int obtenerNumeroFacilidades() throws RemoteException {
         // A RELLENAR
-        |
-        |
+        return accountev.obtenerNumeroFacilidades();
     }
 
     @Override
     public int obtenerNumeroNiveles() throws RemoteException {
         // A RELLENAR
-        |
-        |
+        return accountev.obtenerNumeroNiveles();
     }
 
     @Override
     public String obtenerNombreFacilidad(int facilidad) throws RemoteException {
         // A RELLENAR
-        |
-        |
+        return fac_names[facilidad];
     }
 
     @Override
     public String obtenerNombreNivel(int nivel) throws RemoteException {
         // A RELLENAR
-        |
-        |
+        return level_names[nivel];
+    
     }
 }

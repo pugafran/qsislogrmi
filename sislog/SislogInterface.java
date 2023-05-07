@@ -8,6 +8,10 @@ import java.rmi.RemoteException;
 */
 public interface SislogInterface extends Remote {
     // A RELLENAR
-    |
-    |
+    int obtenerValorFacilidadNivel(int facilidad,int nivel) throws RemoteException;
+    int obtenerNumeroFacilidades() throws RemoteException;
+    int obtenerNumeroNiveles() throws RemoteException;
+    String obtenerNombreFacilidad(int facilidad) throws RemoteException;
+    String obtenerNombreNivel(int nivel) throws RemoteException;
+      
 }
