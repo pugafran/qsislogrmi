@@ -1,0 +1,11 @@
+echo "Compilando ContabilidadEventos"
+javac -d ../clases -cp ../clases ContabilidadEventos.java
+
+echo "Compilando interfaz RMI del Sislog"
+javac -d ../clases SislogInterface.java
+
+echo "Compilando implementación RMI del Sislog"
+javac -d ../clases -cp ../clases SislogImpl.java
+
+echo "Compilando el Servidor de Sislog"
+javac -d ../clases -cp ../clases:../clases/rabbitmq-client.jar Sislog.java 

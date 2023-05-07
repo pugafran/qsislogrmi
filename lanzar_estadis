@@ -1,0 +1,2 @@
+echo "Lanzando Estadis"
+java -cp clases:clases/rabbitmq-client.jar -Djava.security.policy=policy cliente.Estadis

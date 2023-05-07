@@ -1,0 +1,3 @@
+#!/bin/bash
+CLASSPATH=./clases/rabbitmq-client.jar
+java -cp $CLASSPATH ./cliente/Cliente.java $1

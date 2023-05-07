@@ -1,0 +1,5 @@
+echo "Compilando el cliente de sislog"
+javac -d ../clases -cp ../clases:../clases/rabbitmq-client.jar Cliente.java
+
+echo "Compilando el generador de estadisticas de sislog"
+javac -d ../clases -cp ../clases:../clases/rabbitmq-client.jar Estadis.java
