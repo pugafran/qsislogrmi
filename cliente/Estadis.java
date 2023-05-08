@@ -29,9 +29,9 @@ public class Estadis {
         // Parte principal, toda dentro de un try para capturar cualquier excepción
         try {
             // A RELLENAR. Obtener por RMI el número de niveles (ncols) y facilidades (nfils)
-            |
-            |
-            |
+            evtserv = (SislogInterface) Naming.lookup("//localhost/Sislog");
+            ncols = evtserv.obtenerNumeroNiveles();
+            nfils = evtserv.obtenerNumeroFacilidades();
 
             System.out.println("**************************  RECUENTO EVENTOS  ********************************");
             System.out.print("\t");
@@ -39,9 +39,10 @@ public class Estadis {
             // Imprimir, separados por \t, los nombres de las columnas (nombres de niveles
             // que se obtienen por RMI)
             // A RELLENAR
-            |
-            |
-            |
+            for (int i=0;i<ncols;i++)
+                System.out.print(evtserv.obtenerNombreNivel(i) + "\t");
+            
+
 
             System.out.println("TOTAL");
             suma=0;
@@ -50,8 +51,9 @@ public class Estadis {
                 // Para cada fila se imprime primero el nombre de la facilidad (obtenido por RMI)
                 // con un \t al final
                 // A RELLENAR
-                |
-                |
+                System.out.print(evtserv.obtenerNombreFacilidad(i) + "\t");
+
+
                 suma=0;
 
                 // Seguidamente se itera por cada columna (nivel) y se obtiene por RMI el valor del
@@ -59,7 +61,7 @@ public class Estadis {
                 for (int j=0;j<ncols;j++)
                 {
                     // A RELLENAR
-                    n = |        // A rellenar
+                    n = evtserv.obtenerValorFacilidadNivel(i, j);
 
                     System.out.print(n+"\t");
                     suma += n;
@@ -77,8 +79,9 @@ public class Estadis {
                 for (int i=0;i<nfils;i++)
                 {
                     // A RELLENAR (RMI y actualización de suma)
-                    |
-                    |
+                    n = evtserv.obtenerValorFacilidadNivel(i, j);
+                    suma += n;
+
                 }
                 System.out.print(suma+"\t");
                 total+=suma;
