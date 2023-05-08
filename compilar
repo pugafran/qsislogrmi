@@ -1,2 +1,7 @@
-(cd sislog && ./compilar)
-(cd cliente && ./compilar)
+#!/bin/bash
+cd sislog
+./compilar
+cd ../cliente
+./compilar
+cd ..
+

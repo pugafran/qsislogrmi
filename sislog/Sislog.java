@@ -57,7 +57,7 @@ class ReceptorEventos extends Thread {
         try {
             Connection connection = factory.newConnection();
             Channel channel = connection.createChannel();
-            channel.queueDeclare(NOMBRE_COLA_RABBIT, false, false, false, null);
+            channel.queueDeclare(NOMBRE_COLA_RABBIT, true, false, false, null);
 
             // Espera por peticiones en la cola rabbitMQ
             Consumer consumer = new DefaultConsumer(channel) {
@@ -118,38 +118,31 @@ class Clasificador extends Thread {
                 // Si se puede tokenizar correctamente se escribe el mensaje de log en el fichero 
                 // correspondiente y en el formato especificado en el enunciado, y se contabiliza el evento
                 // a través de actev.
+                
                 String evtmsg = cola.take();
+                
                 StringTokenizer st = new StringTokenizer(evtmsg, ":");
+                
                 try {
+                    
                     String fac = st.nextToken();
                     String level = st.nextToken();
                     String msg = st.nextToken();
-                    int fac_index = -1;
-                    int level_index = -1;
-                    for (int i = 0; i < fac_names.length; i++) {
-                        if (fac_names[i].equals(fac)) {
-                            fac_index = i;
-                            break;
-                        }
-                    }
-                    for (int i = 0; i < level_names.length; i++) {
-                        if (level_names[i].equals(level)) {
-                            level_index = i;
-                            break;
-                        }
-                    }
-                    if (fac_index == -1 || level_index == -1) {
-                        System.out.println("Clasificador: Error en el mensaje recibido: " + evtmsg);
-                    } else {
-                        String logmsg = String.format("%s %s %s %s", new Date(), fac, level, msg);
-                        System.out.println("Clasificador: " + logmsg);
-                        FileWriter fw = new FileWriter(fac_file_names[fac_index], true);
-                        fw.write(logmsg + "\n");
-                        fw.close();
-                        actev.contabilizaEvento(fac_index, level_index);
-                    }
+
+                
+    
+                    String logmsg = String.format("%s %s %s %s", fac_names[Integer.parseInt(fac)], level_names[Integer.parseInt(level)], new Date(), msg);
+                    System.out.println("Clasificador: " + logmsg);
+                    FileWriter fw = new FileWriter(fac_file_names[Integer.parseInt(fac)], true);
+                    fw.write(logmsg + "\n");
+                    fw.close();
+                    
+                    
+                    actev.contabilizaEvento(Integer.parseInt(fac), Integer.parseInt(level));
+                    
                 } catch (Exception e) {
-                    System.out.println("Clasificador: Error en el mensaje recibido: " + evtmsg);
+                    System.out.println("Clasificador: Error en el mensase recibido: " + evtmsg);
+                    
                 }
             }
         } catch (Exception e) {
@@ -206,6 +199,8 @@ public class Sislog {
         int tam_cola=0;             // Tamaño de la array blocking queue
         int num_workers=0;          // Numero de hilos trabajadores
 
+        System.out.println ("Hewqewqlo");
+
         // Cola interna de sincronización entre el hilo ReceptorPeticiones y los Worker
         ArrayBlockingQueue<String> cola_interna;
         // Variable que representa el hilo receptor de eventos
@@ -249,6 +244,8 @@ public class Sislog {
             System.exit(6);
         }
 
+        
+
         // Creamos el objeto que nos permite llevar la contabilidad de los eventos
         // A RELLENAR
         ContabilidadEventos actev = new ContabilidadEventos(max_facilidades, max_niveles);
@@ -287,6 +284,7 @@ public class Sislog {
         // Creamos el hilo receptor de eventos, almacenamos su referencia y lo arrancamos
         // A RELLENAR
         receptor_eventos = new ReceptorEventos(cola_interna);
+        
         receptor_eventos.start();
         
         // Esperamos a que finalice el hilo receptor de eventos (nunca finalizará, hay que parar con Ctrl+C)

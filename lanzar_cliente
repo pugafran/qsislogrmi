@@ -1,3 +1,2 @@
-#!/bin/bash
-CLASSPATH=./clases/rabbitmq-client.jar
-java -cp $CLASSPATH ./cliente/Cliente.java $1
+echo "Lanzando el cliente"
+java -cp clases:clases/rabbitmq-client.jar -Djava.security.policy=policy cliente.Cliente $1 
