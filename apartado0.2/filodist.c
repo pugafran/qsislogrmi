@@ -54,7 +54,7 @@ void * comunicaciones(void);
 void * esperarConexion(void);
 void printlog(char *msg); //APARTADO 0.2
 void print_token(unsigned char token[2], estado_filosofo estado); //APARTADO 0.2
-char * estado2str(int estado); //APARTADO 0.2
+char* estado2str(int estado); //APARTADO 0.2
 
 int main (int argc, char *argv[])
 {
@@ -294,6 +294,8 @@ void alterarToken(unsigned char *tok, estado_filosofo nuevoestado)
        break; 
      default:;
    }
+
+   
 } 
 
 
@@ -308,8 +310,9 @@ void * comunicaciones(void)
   unsigned char token[2];  //APARTADO 0.1
   token[0] = token[1] = 0; //APARTADO 0.1
 
+  unsigned char old_token[2]; //APARTADO 0.2
+  old_token[0] = old_token[1] = 0; //APARTADO 0.2
   
-
   struct sockaddr_in next;
   struct hostent *host_info;
   int sockserver,sockant;
@@ -328,6 +331,19 @@ void * comunicaciones(void)
   servidor.sin_family=AF_INET;
   servidor.sin_addr.s_addr=htonl(INADDR_ANY);
   servidor.sin_port=htons(puerto_local);
+
+  int reuse = 1;
+      if (setsockopt(sockserver, SOL_SOCKET, SO_REUSEADDR, 
+                      (const char*)&reuse, sizeof(reuse)) < 0)
+          perror("setsockopt(SO_REUSEADDR) failed");
+
+  #ifdef SO_REUSEPORT
+      if (setsockopt(sockserver, SOL_SOCKET, SO_REUSEPORT, 
+                      (const char*)&reuse, sizeof(reuse)) < 0) 
+          perror("setsockopt(SO_REUSEPORT) failed");
+  #endif
+
+
   if (bind(sockserver,(struct sockaddr *) &servidor, sizeof(servidor))<0){
     sprintf(msg,"Filosofo %d: Error vinculando el socket de comunicación con el anterior en el anillo.\n", idfilo); //APARTADO 0.2
     printlog(msg); //APARTADO 0.2
@@ -382,7 +398,6 @@ void * comunicaciones(void)
   
   sprintf(msg,"Filosofo %d: Llega conexion valor %d\n",idfilo,sockant); //APARTADO 0.2
   printlog(msg); //APARTADO 0.2
-
   //si llegamos a este punto el ciclo está completo
   //5-si idfilosofo=0 inyectar token
   if (idfilo==0)
@@ -394,6 +409,9 @@ void * comunicaciones(void)
   {
     //6- esperar token
     ret=read(sockant,token,sizeof(unsigned char) * 2);
+
+    memcpy(old_token, token, sizeof(unsigned char) * 2); //APARTADO 0.2
+
     if (ret!=2)
     {
       sprintf(msg,"Filosofo %d: Error de lectura en el socket de conexion con el anterior nodo Ret=%d\n", idfilo,ret); //APARTADO 0.2
@@ -422,10 +440,16 @@ void * comunicaciones(void)
        pthread_cond_signal(&condestado);
     }
     pthread_mutex_unlock(&mestado);
+
+
+    if(memcmp(old_token, token, sizeof(unsigned char) * 2) != 0) //APARTADO 0.2
+    {
+      print_token(token, estado); //APARTADO 0.2
+    }
+    
     if (ret==2)    // si se leyó bien
     {
       ret=write(socknext,token,sizeof(char) * 2); //APARTADO 0.1
-      print_token(token, estado); //APARTADO 0.2
       usleep(1000); //APARTADO 0.1
       if (ret!=2)
       {
