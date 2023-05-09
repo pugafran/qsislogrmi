@@ -53,6 +53,8 @@ void alterarToken(unsigned char *tok, estado_filosofo nuevoestado);
 void * comunicaciones(void);
 void * esperarConexion(void);
 void printlog(char *msg); //APARTADO 0.2
+void print_token(unsigned char token[2], estado_filosofo estado); //APARTADO 0.2
+char * estado2str(int estado); //APARTADO 0.2
 
 int main (int argc, char *argv[])
 {
@@ -174,6 +176,36 @@ void printlog(char *msg) // APARTADO 0.2
   gettimeofday(&tv, NULL);
   fprintf(stderr, "%ld.%06ld %s", tv.tv_sec, tv.tv_usec, msg);
 }
+
+void print_token(unsigned char token[2], estado_filosofo estado) {
+  // El tipo estado_filosofo es un enum declarado en filodist.h
+  char buff[2][9];
+  unsigned char tok;
+  char msg[100];
+
+  for (int byte=0; byte<2; byte++) {  // Para cada byte del token
+    tok = token[byte];
+    for (int i=7; i>=0; i--) {        // Sacamos sus bits
+      buff[byte][i] = (tok&1)?'1':'0';
+      tok = tok >> 1;
+    }
+    buff[byte][8]=0;                  // Añadir terminador de cadena
+  }
+  sprintf(msg, "Filosofo %d: (estado=%s) transmite token = %s|%s\n", idfilo, estado2str(estado), buff[0], buff[1]);
+  printlog(msg);
+}
+
+ char* estado2str(int estado) {
+  switch (estado) {
+    case 0: return "no_sentado";
+    case 1: return "queriendo_comer";
+    case 2: return "comiendo";
+    case 3: return "dejando_comer";
+    case 4: return "pensando";
+    default: return "desconocido";
+  }
+}
+
 
 //sincronización con el cambio de estado a "comiendo"
 void esperarPalillos(void)
@@ -393,6 +425,7 @@ void * comunicaciones(void)
     if (ret==2)    // si se leyó bien
     {
       ret=write(socknext,token,sizeof(char) * 2); //APARTADO 0.1
+      print_token(token, estado); //APARTADO 0.2
       usleep(1000); //APARTADO 0.1
       if (ret!=2)
       {
