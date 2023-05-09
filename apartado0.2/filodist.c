@@ -325,7 +325,7 @@ void * comunicaciones(void)
   host_info = gethostbyname(siguiente_chain);
   if (host_info==NULL)
   {
-    sprintf(stderr,"Filosofo %d: nombre de host desconocido: %s\n", idfilo,siguiente_chain); //APARTADO 0.2
+    sprintf(msg,"Filosofo %d: nombre de host desconocido: %s\n", idfilo,siguiente_chain); //APARTADO 0.2
     printlog(msg); //APARTADO 0.2
 
     exit(3);
@@ -337,7 +337,7 @@ void * comunicaciones(void)
 
   if (connect(socknext, (struct sockaddr *) &next, sizeof(next))<0)
   {
-    sprintf(stderr,"Filosofo %d: Error %d conectando con el filosofo siguiente\n", idfilo, errno);  //APARTADO 0.2
+    sprintf(msg,"Filosofo %d: Error %d conectando con el filosofo siguiente\n", idfilo, errno);  //APARTADO 0.2
     printlog(msg); //APARTADO 0.2
 
     perror("Error conectando\n");
@@ -347,7 +347,9 @@ void * comunicaciones(void)
   anterior_len=sizeof(anterior);
   sockant=accept(sockserver,(struct sockaddr *) &anterior,
                  (socklen_t *) &anterior_len);   
-  fprintf(stderr,"Filosofo %d: Llega conexion valor %d\n",idfilo,sockant);
+  
+  sprintf(msg,"Filosofo %d: Llega conexion valor %d\n",idfilo,sockant); //APARTADO 0.2
+  printlog(msg); //APARTADO 0.2
 
   //si llegamos a este punto el ciclo está completo
   //5-si idfilosofo=0 inyectar token
@@ -362,9 +364,9 @@ void * comunicaciones(void)
     ret=read(sockant,token,sizeof(unsigned char) * 2);
     if (ret!=2)
     {
-      fprintf(stderr,"Filosofo %d: Error de lectura "
-            "en el socket de conexion con el anterior nodo Ret=%d\n",
-            idfilo,ret);
+      sprintf(msg,"Filosofo %d: Error de lectura en el socket de conexion con el anterior nodo Ret=%d\n", idfilo,ret); //APARTADO 0.2
+      printlog(msg); //APARTADO 0.2
+
     }
     pthread_mutex_lock(&mestado);
     if (estado==queriendo_comer)
@@ -394,8 +396,8 @@ void * comunicaciones(void)
       usleep(1000); //APARTADO 0.1
       if (ret!=2)
       {
-        fprintf(stderr,"Error de escritura "
-                "en el socket de conexion con el siguiente nodo\n");
+        sprintf(msg,"Error de escritura en el socket de conexion con el siguiente nodo\n"); //APARTADO 0.2
+        printlog(msg); //APARTADO 0.2
       }
     }
 
