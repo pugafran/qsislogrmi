@@ -247,6 +247,8 @@ void * comunicaciones(void)
   unsigned char token[2];  //APARTADO 0.1
   token[0] = token[1] = 0; //APARTADO 0.1
 
+  
+
   struct sockaddr_in next;
   struct hostent *host_info;
   int sockserver,sockant;
@@ -356,6 +358,7 @@ void * comunicaciones(void)
     if (ret==2)    // si se leyó bien
     {
       ret=write(socknext,token,sizeof(char) * 2); //APARTADO 0.1
+      usleep(1000); //APARTADO 0.1
       if (ret!=2)
       {
         fprintf(stderr,"Error de escritura "
