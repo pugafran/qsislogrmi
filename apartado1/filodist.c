@@ -156,7 +156,6 @@ void * filosofo(void)
      sprintf(msg, "Filosofo %d: cambiando estado a queriendo condimentar\n",idfilo); // APARTADO 1
      printlog(msg); // APARTADO 1
      cambiarEstado(queriendo_condimentar); // APARTADO 1
-  
      esperarCuchara(); // APARTADO 1
 
      sprintf(msg, "Filosofo %d: Condimentando\n",idfilo); //APARTADO 1
@@ -362,10 +361,10 @@ void alterarToken(unsigned char *tok, estado_filosofo nuevoestado)
           *tok|=0x40; //01000000
        break;
      case hablando: //APARTADO 1
-       if(cucharaLibre(tok[0]) == 1)
-          *tok&=~0x40;
+       if(cucharaLibre(tok[0]) == 1 || cucharaLibre(tok[0]) == 0)
+          *tok&=0xBF;
        else if(cucharaLibre(tok[0]) == 2)
-          *tok&=~0x80; 
+          *tok&=0x7F; 
        break; 
      default:;
    }
