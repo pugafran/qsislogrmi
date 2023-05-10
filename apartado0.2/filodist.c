@@ -177,7 +177,7 @@ void printlog(char *msg) // APARTADO 0.2
   fprintf(stderr, "%ld.%06ld %s", tv.tv_sec, tv.tv_usec, msg);
 }
 
-void print_token(unsigned char token[2], estado_filosofo estado) {
+void print_token(unsigned char token[2], estado_filosofo estado) { // APARTADO 0.2
   // El tipo estado_filosofo es un enum declarado en filodist.h
   char buff[2][9];
   unsigned char tok;
@@ -195,7 +195,7 @@ void print_token(unsigned char token[2], estado_filosofo estado) {
   printlog(msg);
 }
 
- char* estado2str(int estado) {
+ char* estado2str(int estado) { //APARTADO 0.2
   switch (estado) {
     case 0: return "no_sentado";
     case 1: return "queriendo_comer";
