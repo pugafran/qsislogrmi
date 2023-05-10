@@ -155,17 +155,18 @@ void * filosofo(void)
      
      sprintf(msg, "Filosofo %d: cambiando estado a queriendo condimentar\n",idfilo); // APARTADO 1
      printlog(msg); // APARTADO 1
+     printf("0\n");
      cambiarEstado(queriendo_condimentar); // APARTADO 1
+     printf("1\n");
+     printf(estado2str(estado)); // APARTADO 1
      esperarCuchara(); // APARTADO 1
 
      sprintf(msg, "Filosofo %d: Condimentando\n",idfilo); //APARTADO 1
      printlog(msg); //APARTADO 1
      sleep(5); //APARTADO 1
-     printf("1\n");
      cambiarEstado(dejando_condimentar); //APARTADO 1
-      printf("2\n");
      soltarCuchara();
-     printf("3\n");
+    
 
      sprintf(msg, "Filosofo %d: Hablando\n",idfilo); //APARTADO 1
      printlog(msg); //APARTADO 1
@@ -308,7 +309,7 @@ int cucharaLibre(unsigned char token) //APARTADO 1
 {
 
   //0xC0=11000000 en binario y 0x80=10000000 en binario y 0x40=01000000 en binario
-  if((token & 0xC0) == 0x40)
+  if((token & 0xC0) == 0x40 || (token & 0xC0) == 0)
     return 1;
   else if((token & 0xC0) == 0x80)
     return 2;
@@ -505,13 +506,14 @@ void * comunicaciones(void)
     if (estado==queriendo_condimentar) //APARTADO 1
     {   
       
-
+      
        if (cucharaLibre(token[0]) != 0) { //APARTADO 1
+         printf("Ñ");
          alterarToken(&token[0],condimentando); //APARTADO 1
          estado=condimentando; //APARTADO 1
          pthread_cond_signal(&condestado); //APARTADO 1
        }
-
+      
        
     }
 
@@ -564,7 +566,6 @@ void * comunicaciones(void)
       
       ret=write(socknext,token,sizeof(char) * 2); //APARTADO 0.1
       usleep(1000); //APARTADO 0.1
-      printf("GNOMO 2\n");
       if (ret!=2)
       {
         sprintf(msg,"Error de escritura en el socket de conexion con el siguiente nodo\n"); //APARTADO 0.2
