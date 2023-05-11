@@ -268,6 +268,19 @@ void * comunicaciones(void)
   servidor.sin_family=AF_INET;
   servidor.sin_addr.s_addr=htonl(INADDR_ANY);
   servidor.sin_port=htons(puerto_local);
+
+  int reuse = 1;
+      if (setsockopt(sockserver, SOL_SOCKET, SO_REUSEADDR, 
+                      (const char*)&reuse, sizeof(reuse)) < 0)
+          perror("setsockopt(SO_REUSEADDR) failed");
+
+  #ifdef SO_REUSEPORT
+      if (setsockopt(sockserver, SOL_SOCKET, SO_REUSEPORT, 
+                      (const char*)&reuse, sizeof(reuse)) < 0) 
+          perror("setsockopt(SO_REUSEPORT) failed");
+  #endif
+
+
   if (bind(sockserver,(struct sockaddr *) &servidor, sizeof(servidor))<0){
     fprintf(stderr,"Filosofo %d: Error vinculando el "
             "socket de comunicación con el anterior en el anillo.\n",

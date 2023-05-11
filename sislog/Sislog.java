@@ -266,6 +266,7 @@ public class Sislog {
             SislogImpl sislog = new SislogImpl(actev, facilities_names, level_names);
             Naming.rebind("Sislog", sislog);
             System.out.println("Sislog registrado para RMI");
+            
 
         } 
         catch (Exception e) {
