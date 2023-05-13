@@ -40,6 +40,22 @@ pthread_cond_t condestado;
 
 char msg[100]; // APARTADO 0.2
 
+/*
+  Códigos de error en el exit:
+  1: error en la linea de comandos
+  2: error en el numero de filosofos
+  3: error en la creacion del socket de comunicación con el anterior en el anillo
+  4: error en el bind
+  7: error en la conexión con el filosofo siguiente
+  10: error en el pthread_create
+  11: error en el pthread_mutex_lock
+  12: error en el pthread_mutex_unlock
+  13: error en el pthread_mutex_init
+  14: error en el pthread_cond_init
+  15: error en el pthread_cond_wait
+
+*/
+
 /* prototipos funciones*/
 void procesaLineaComandos(int numero, char *lista[]);
 void inicializaciones(void);
@@ -144,8 +160,23 @@ void procesaLineaComandos(int numero, char *lista[])
 // inicializa el mutex, la variable condicional y el estado del filósofo
 void inicializaciones(void)
 {
-  pthread_mutex_init(&mestado, NULL);
-  pthread_cond_init(&condestado, NULL);
+
+  if (pthread_mutex_init(&mestado, NULL) != 0)
+  {
+    sprintf(msg, "Filosofo %d: Error al inicializar el mutex\n", idfilo); // APARTADO 0.2
+    printlog(msg);                                                        // APARTADO 0.2
+
+    exit(13);
+  }
+
+  if (pthread_cond_init(&condestado, NULL) != 0)
+  {
+    sprintf(msg, "Filosofo %d: Error al inicializar la variable condicional\n", idfilo); // APARTADO 0.2
+    printlog(msg);                                                                       // APARTADO 0.2
+
+    exit(14);
+  }
+
   estado = no_sentado;
 }
 // hilo principal del filosofo
@@ -187,13 +218,15 @@ void *filosofo(void)
     sleep(10);
   }
 
-  cambiarEstado(levantado);                                       // APARTADO 2                                               
+  cambiarEstado(levantado);                                       // APARTADO 2
   sprintf(msg, "Filosofo %d: Levantandose de la mesa\n", idfilo); // APARTADO 0.2
-  printlog(msg);  
-  sleep(10);                                                // APARTADO 0.2
-                        
+  printlog(msg);
+  sleep(10); // APARTADO 0.2
+
   sprintf(msg, "Filosofo %d: Esperando para irse\n", idfilo); // APARTADO 2
   printlog(msg);                                              // APARTADO 2
+
+  return NULL; // APARTADO 0.1
 }
 
 void printlog(char *msg) // APARTADO 0.2
@@ -259,53 +292,166 @@ char *estado2str(int estado)
 // sincronización con el cambio de estado a "comiendo"
 void esperarPalillos(void)
 {
-  pthread_mutex_lock(&mestado);
+  if (pthread_mutex_lock(&mestado) != 0)
+  {
+    sprintf(msg, "Filosofo %d: Error al bloquear el mutex.\n", idfilo);
+    printlog(msg);
+    exit(11);
+  }
+
   while (estado != comiendo)
-    pthread_cond_wait(&condestado, &mestado);
-  pthread_mutex_unlock(&mestado);
+  {
+    if (pthread_cond_wait(&condestado, &mestado) != 0)
+    {
+      sprintf(msg, "Filosofo %d: Error al esperar a que el estado sea comiendo\n", idfilo);
+      printlog(msg);
+      exit(15);
+    }
+  }
+  
+  if (pthread_mutex_unlock(&mestado) != 0)
+  {
+    sprintf(msg, "Filosofo %d: Error al desbloquear el mutex.\n", idfilo);
+    printlog(msg);
+    exit(12);
+  }
+
 }
 // sincronización con el cambio de estado a "pensando"
 void soltarPalillos(void)
 {
-  pthread_mutex_lock(&mestado);
+  if (pthread_mutex_lock(&mestado) != 0)
+  {
+    sprintf(msg, "Filosofo %d: Error al bloquear el mutex.\n", idfilo);
+    printlog(msg);
+    exit(11);
+  }
+
   while (estado != pensando)
-    pthread_cond_wait(&condestado, &mestado);
-  pthread_mutex_unlock(&mestado);
+  {
+    if (pthread_cond_wait(&condestado, &mestado) != 0)
+    {
+      sprintf(msg, "Filosofo %d: Error al esperar a que el estado sea pensando\n", idfilo);
+      printlog(msg);
+      exit(15);
+    }
+  }
+  
+  if (pthread_mutex_unlock(&mestado) != 0)
+  {
+    sprintf(msg, "Filosofo %d: Error al desbloquear el mutex.\n", idfilo);
+    printlog(msg);
+    exit(12);
+  }
+
 }
 
 // sincronización con el cambio de estado a "levantado"
 void soltarSilla(void)
 {
-  pthread_mutex_lock(&mestado);
+  if (pthread_mutex_lock(&mestado) != 0)
+  {
+    sprintf(msg, "Filosofo %d: Error al bloquear el mutex.\n", idfilo);
+    printlog(msg);
+    exit(11);
+  }
+
   while (estado != levantado)
-    pthread_cond_wait(&condestado, &mestado);
-  pthread_mutex_unlock(&mestado);
+  {
+    if (pthread_cond_wait(&condestado, &mestado) != 0)
+    {
+      sprintf(msg, "Filosofo %d: Error al esperar a que el estado sea levantado\n", idfilo);
+      printlog(msg);
+      exit(15);
+    }
+  }
+  
+  if (pthread_mutex_unlock(&mestado) != 0)
+  {
+    sprintf(msg, "Filosofo %d: Error al desbloquear el mutex.\n", idfilo);
+    printlog(msg);
+    exit(12);
+  }
+
 }
 
 // sincronización con el cambio de estado a "condimentando"
 void esperarCuchara(void) // APARTADO 1
 {
-  pthread_mutex_lock(&mestado);
+  if (pthread_mutex_lock(&mestado) != 0)
+  {
+    sprintf(msg, "Filosofo %d: Error al bloquear el mutex.\n", idfilo);
+    printlog(msg);
+    exit(11);
+  }
+
   while (estado != condimentando)
-    pthread_cond_wait(&condestado, &mestado);
-  pthread_mutex_unlock(&mestado);
+  {
+    if (pthread_cond_wait(&condestado, &mestado) != 0)
+    {
+      sprintf(msg, "Filosofo %d: Error al esperar a que el estado sea condimentando\n", idfilo);
+      printlog(msg);
+      exit(15);
+    }
+  }
+
+  if (pthread_mutex_unlock(&mestado) != 0)
+  {
+    sprintf(msg, "Filosofo %d: Error al desbloquear el mutex.\n", idfilo);
+    printlog(msg);
+    exit(12);
+  }
+
 }
 
 // sincronización con el cambio de estado a "hablando"
 void soltarCuchara(void) // APARTADO 1
 {
-  pthread_mutex_lock(&mestado);
+  if (pthread_mutex_lock(&mestado) != 0)
+  {
+    sprintf(msg, "Filosofo %d: Error al bloquear el mutex.\n", idfilo);
+    printlog(msg);
+    exit(11);
+  }
+
   while (estado != hablando)
-    pthread_cond_wait(&condestado, &mestado);
-  pthread_mutex_unlock(&mestado);
+  {
+    if (pthread_cond_wait(&condestado, &mestado) != 0)
+    {
+      sprintf(msg, "Filosofo %d: Error al esperar a que el estado sea hablando\n", idfilo);
+      printlog(msg);
+      exit(15);
+    }
+  }
+
+  if (pthread_mutex_unlock(&mestado) != 0)
+  {
+    sprintf(msg, "Filosofo %d: Error al desbloquear el mutex.\n", idfilo);
+    printlog(msg);
+    exit(12);
+  }
+
 }
 
 // modificando el estado del filósofo
 void cambiarEstado(estado_filosofo nuevoestado)
 {
-  pthread_mutex_lock(&mestado);
+  if (pthread_mutex_lock(&mestado) != 0)
+  {
+    sprintf(msg, "Filosofo %d: Error al bloquear el mutex.\n", idfilo);
+    printlog(msg);
+    exit(11);
+  }
+
   estado = nuevoestado;
-  pthread_mutex_unlock(&mestado);
+  
+  if (pthread_mutex_unlock(&mestado) != 0)
+  {
+    sprintf(msg, "Filosofo %d: Error al desbloquear el mutex.\n", idfilo);
+    printlog(msg);
+    exit(12);
+  }
+  
 }
 // comprueba el estado de los palillos necesarios
 // para que el filósofo pueda comer
@@ -407,13 +553,12 @@ void alterarToken(unsigned char *tok, estado_filosofo nuevoestado)
       *tok |= 0xFF; // 11111111
     }
 
-  /*
-      if ((*tok & 0xFF) == 0xFF) // si estan todos levantados (11111111) se van los demás
-      exit(0);
+    /*
+        if ((*tok & 0xFF) == 0xFF) // si estan todos levantados (11111111) se van los demás
+        exit(0);
+      break;
+    */
     break;
-  */
-    break;
-
   }
 }
 
@@ -519,21 +664,17 @@ void *comunicaciones(void)
   {
 
     write(socknext, token, (size_t)sizeof(unsigned char) * 2);
-
   }
 
   //  mientras no fin
   while (1)
   {
 
-      //if((token[0] & 0xFF) == 0xFF && idfilo == 0)
-        //exit(0);
-
+    // if((token[0] & 0xFF) == 0xFF && idfilo == 0)
+    // exit(0);
 
     // 6- esperar token
     ret = read(sockant, token, sizeof(unsigned char) * 2);
-
-
 
     memcpy(old_token, token, sizeof(unsigned char) * 2); // APARTADO 0.2
 
@@ -543,15 +684,26 @@ void *comunicaciones(void)
       printlog(msg);                                                                                                     // APARTADO 0.2
     }
 
-    pthread_mutex_lock(&mestado);        // APARTADO 1
+    if (pthread_mutex_lock(&mestado) != 0)
+    {                                                                     // APARTADO 1
+      sprintf(msg, "Filosofo %d: Error al bloquear el mutex.\n", idfilo); // APARTADO 1
+      printlog(msg);                                                      // APARTADO 1
+      exit(11);                                                           // APARTADO 1
+    }
+
     if (estado == queriendo_condimentar) // APARTADO 1
     {
 
-      if (cucharaLibre(token[0]) != 0)
+      if (cucharaLibre(token[0]) != 0)          // APARTADO 1
       {                                         // APARTADO 1
         alterarToken(&token[0], condimentando); // APARTADO 1
         estado = condimentando;                 // APARTADO 1
-        pthread_cond_signal(&condestado);       // APARTADO 1
+
+        if (pthread_cond_signal(&condestado) != 0)
+        {                                                                                                                  // APARTADO 1
+          sprintf(msg, "Filosofo %d: Error al señalar la condición en queriendo_condimentar -> condimentando.\n", idfilo); // APARTADO 1
+          printlog(msg);                                                                                                   // APARTADO 1
+        }
       }
     }
 
@@ -560,11 +712,28 @@ void *comunicaciones(void)
 
       alterarToken(&token[0], hablando); // APARTADO 1
       estado = hablando;                 // APARTADO 1
-      pthread_cond_signal(&condestado);  // APARTADO 1
-    }
-    pthread_mutex_unlock(&mestado); // APARTADO 1
 
-    pthread_mutex_lock(&mestado);
+      if (pthread_cond_signal(&condestado) != 0)
+      {                                                                                                           // APARTADO 1
+        sprintf(msg, "Filosofo %d: Error al señalar la condición en dejando_condimentar -> hablando.\n", idfilo); // APARTADO 1
+        printlog(msg);                                                                                            // APARTADO 1
+      }
+    }
+
+    if (pthread_mutex_unlock(&mestado) != 0)
+    {                                                                        // APARTADO 1
+      sprintf(msg, "Filosofo %d: Error al desbloquear el mutex.\n", idfilo); // APARTADO 1
+      printlog(msg);                                                         // APARTADO 1
+      exit(12);                                                              // APARTADO 1
+    }
+
+    if (pthread_mutex_lock(&mestado) != 0)
+    {                                                                     // APARTADO 0.1 //
+      sprintf(msg, "Filosofo %d: Error al bloquear el mutex.\n", idfilo); // APARTADO 0.1
+      printlog(msg);                                                      // APARTADO 0.1
+      exit(11);                                                           // APARTADO 0.1
+    }
+
     if (estado == queriendo_comer)
     {
       //   si no si estado=queriendo_comer
@@ -574,9 +743,15 @@ void *comunicaciones(void)
       {                                    // APARTADO 0.1
         alterarToken(token + 1, comiendo); // APARTADO 0.1
         estado = comiendo;
-        pthread_cond_signal(&condestado);
+
+        if (pthread_cond_signal(&condestado) != 0)
+        {                                                                                                       // APARTADO 0.1
+          sprintf(msg, "Filosofo %d: Error al señalar la condición en queriendo_comer -> comiendo.\n", idfilo); // APARTADO 0.1
+          printlog(msg);                                                                                        // APARTADO 0.1
+        }
       }
     }
+
     //   si no si estado=dejando_comer
     else if (estado == dejando_comer)
     {
@@ -584,11 +759,25 @@ void *comunicaciones(void)
       //    cambiar estado a pensando y señalar la condicion
       alterarToken(token + 1, pensando); // APARTADO 0.1
       estado = pensando;
-      pthread_cond_signal(&condestado);
+      if (pthread_cond_signal(&condestado) != 0)
+      {                                                                                                   // APARTADO 0.1
+        sprintf(msg, "Filosofo %d: Error al señalar la condición en dejando_comer -> pensar.\n", idfilo); // APARTADO 0.1
+        printlog(msg);                                                                                    // APARTADO 0.1
+      }
     }
-    pthread_mutex_unlock(&mestado);
 
-    pthread_mutex_lock(&mestado); // APARTADO 2
+    if (pthread_mutex_unlock(&mestado) != 0)
+    {                                                                        // APARTADO 0.1
+      sprintf(msg, "Filosofo %d: Error al desbloquear el mutex.\n", idfilo); // APARTADO 0.1
+      printlog(msg);                                                         // APARTADO 0.1
+      exit(12);                                                              // APARTADO 0.1
+    }
+
+    if (pthread_mutex_lock(&mestado) != 0)
+    {                                                                     // APARTADO 2
+      sprintf(msg, "Filosofo %d: Error al bloquear el mutex.\n", idfilo); // APARTADO 2
+      printlog(msg);                                                      // APARTADO 2
+    }
     if (estado == levantado)
     {                                     // APARTADO 2
       alterarToken(&token[0], levantado); // APARTADO 2
@@ -600,7 +789,11 @@ void *comunicaciones(void)
       alterarToken(&token[0], esperando_irse); // APARTADO 2
     }
 
-    pthread_mutex_unlock(&mestado);
+    if (pthread_mutex_unlock(&mestado) != 0)
+    {                                                                        // APARTADO 2
+      sprintf(msg, "Filosofo %d: Error al desbloquear el mutex.\n", idfilo); // APARTADO 2
+      printlog(msg);                                                         // APARTADO 2
+    }
 
     if (memcmp(old_token, token, sizeof(unsigned char) * 2) != 0) // APARTADO 0.2
     {
@@ -613,7 +806,7 @@ void *comunicaciones(void)
       ret = write(socknext, token, sizeof(char) * 2); // APARTADO 0.1
       usleep(1000);                                   // APARTADO 0.1
 
-      if((token[0] & 0xFF) == 0xFF)
+      if ((token[0] & 0xFF) == 0xFF)
         exit(0);
 
       if (ret != 2)
