@@ -1,3 +1,5 @@
+#!/bin/sh
+
 if [ "$#" -ne 4 ]; then
     echo "Forma de uso: $0 <num_facilidades> <num_niveles> <tam_cola> <num_workers>"
     exit

@@ -1,2 +1,4 @@
+#!/bin/sh
+
 echo "Lanzando el cliente"
 java -cp clases:clases/rabbitmq-client.jar -Djava.security.policy=policy cliente.Cliente $1 

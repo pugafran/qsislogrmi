@@ -1,3 +1,5 @@
+#!/bin/sh
+
 if [ "$#" -ne 2 ]; then
     echo "Forma de uso: $0 <numero_clientes> <fichero_eventos>"
     exit

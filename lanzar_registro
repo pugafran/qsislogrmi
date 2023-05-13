@@ -1,1 +1,7 @@
-CLASSPATH=clases rmiregistry &
+#!/bin/sh
+
+if lsof -Pi :1099 -sTCP:LISTEN -t >/dev/null ; then
+    echo "rmiregistry ya está en ejecución en el puerto 1099"
+else
+    CLASSPATH=clases rmiregistry &
+fi

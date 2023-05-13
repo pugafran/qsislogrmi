@@ -31,13 +31,22 @@ class ContabilidadEventos {
             }
         }
 
+        else
+            System.err.println("Error en contabilidad: facilidad o nivel fuera de rango");
+
 
     }
 
     // Metodo que devuelve el número de eventos contabilizados para una facilidad y un nivel dados
     int obtenerValorFacilidadNivel(int facilidad, int nivel)
     {
-       int ret;
+       
+        if (facilidad < 0 || facilidad >= filas || nivel < 0 || nivel >= columnas) {
+            System.err.println("Error en contabilidad: índices fuera de rango.");
+            return -1;  
+        }
+       
+        int ret;
        // La lectura del contador debe hacerse sincronizada por si otro hilo
        // lo está modificando
 

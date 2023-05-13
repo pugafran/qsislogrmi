@@ -120,7 +120,6 @@ class Clasificador extends Thread {
                 // a través de actev.
                 
                 String evtmsg = cola.take();
-                
                 StringTokenizer st = new StringTokenizer(evtmsg, ":");
                 
                 try {
@@ -133,7 +132,9 @@ class Clasificador extends Thread {
     
                     String logmsg = String.format("%s %s %s %s", fac_names[Integer.parseInt(fac)], level_names[Integer.parseInt(level)], new Date(), msg);
                     System.out.println("Clasificador: " + logmsg);
+                    
                     FileWriter fw = new FileWriter(fac_file_names[Integer.parseInt(fac)], true);
+                    
                     fw.write(logmsg + "\n");
                     fw.close();
                     
@@ -141,11 +142,12 @@ class Clasificador extends Thread {
                     actev.contabilizaEvento(Integer.parseInt(fac), Integer.parseInt(level));
                     
                 } catch (Exception e) {
-                    System.out.println("Clasificador: Error en el mensase recibido: " + evtmsg);
+                    System.err.println("Clasificador: Error en el mensase recibido: " + evtmsg);
                     
                 }
             }
         } catch (Exception e) {
+            System.err.println("Error en el hilo Clasificador: " + e.getMessage());
             e.printStackTrace();
             System.exit(8);
         }
@@ -199,7 +201,7 @@ public class Sislog {
         int tam_cola=0;             // Tamaño de la array blocking queue
         int num_workers=0;          // Numero de hilos trabajadores
 
-        System.out.println ("Hewqewqlo");
+
 
         // Cola interna de sincronización entre el hilo ReceptorPeticiones y los Worker
         ArrayBlockingQueue<String> cola_interna;
@@ -271,8 +273,8 @@ public class Sislog {
         } 
         catch (Exception e) {
             // Cualquier excepción simplemente se imprime y se ignora
-            System.out.println("Error al registrar el objeto RMI interfaz con el Syslog: " + e.getMessage());
-            e.printStackTrace();
+            System.err.println("Error al registrar el objeto RMI interfaz con el Syslog: " + e.getMessage());
+            
         }
         // Creamos los hilos clasificadores, guardamos sus referencias en un array y los arrancamos
         clasificadores = new Clasificador[num_workers];
