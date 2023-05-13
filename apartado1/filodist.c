@@ -354,17 +354,18 @@ void alterarToken(unsigned char *tok, estado_filosofo nuevoestado)
        bit=bit<<pos;
        tokenaux|=bit;
        *tok=~tokenaux;
+       break;
      case condimentando: //APARTADO 1
-       if(cucharaLibre(tok[0]) == 1)
+       if(cucharaLibre(*tok) == 1)
           *tok|=0x80; //10000000
-       else if(cucharaLibre(tok[0]) == 2)
+       else if(cucharaLibre(*tok) == 2)
           *tok|=0x40; //01000000
        break;
      case hablando: //APARTADO 1
-       if(cucharaLibre(tok[0]) == 1 || cucharaLibre(tok[0]) == 0)
-          *tok&=0xBF;
-       else if(cucharaLibre(tok[0]) == 2)
-          *tok&=0x7F; 
+       if(cucharaLibre(*tok) == 1 || cucharaLibre(*tok) == 0)
+          *tok&=0xBF; //10111111
+       else if(cucharaLibre(*tok) == 2)
+          *tok&=0x7F; //01111111
        break; 
      default:;
    }

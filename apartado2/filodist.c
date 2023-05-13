@@ -383,6 +383,7 @@ void alterarToken(unsigned char *tok, estado_filosofo nuevoestado)
     bit = bit << pos;
     tokenaux |= bit;
     *tok = ~tokenaux;
+    break;
   case condimentando: // APARTADO 1
     if (cucharaLibre(tok[0]) == 1)
       *tok |= 0x80; // 10000000
@@ -404,12 +405,15 @@ void alterarToken(unsigned char *tok, estado_filosofo nuevoestado)
     if (idfilo == 0 && ((*tok & 0x07) == 0x07))
     {
       *tok |= 0xFF; // 11111111
-      exit(0);
     }
 
-    if ((*tok & 0xFF) == 0xFF) // si estan todos levantados (11111111) se van los demás
+  /*
+      if ((*tok & 0xFF) == 0xFF) // si estan todos levantados (11111111) se van los demás
       exit(0);
     break;
+  */
+    break;
+
   }
 }
 
@@ -515,14 +519,21 @@ void *comunicaciones(void)
   {
 
     write(socknext, token, (size_t)sizeof(unsigned char) * 2);
+
   }
 
   //  mientras no fin
   while (1)
   {
 
+      //if((token[0] & 0xFF) == 0xFF && idfilo == 0)
+        //exit(0);
+
+
     // 6- esperar token
     ret = read(sockant, token, sizeof(unsigned char) * 2);
+
+
 
     memcpy(old_token, token, sizeof(unsigned char) * 2); // APARTADO 0.2
 
@@ -601,6 +612,10 @@ void *comunicaciones(void)
 
       ret = write(socknext, token, sizeof(char) * 2); // APARTADO 0.1
       usleep(1000);                                   // APARTADO 0.1
+
+      if((token[0] & 0xFF) == 0xFF)
+        exit(0);
+
       if (ret != 2)
       {
         sprintf(msg, "Error de escritura en el socket de conexion con el siguiente nodo\n"); // APARTADO 0.2
