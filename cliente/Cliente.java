@@ -10,6 +10,8 @@ import javax.sound.sampled.Line;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
+import com.rabbitmq.client.AMQP;
+
 
 public class Cliente {
     // A RELLENAR el nombre de la cola
@@ -70,8 +72,15 @@ public class Cliente {
         try {
             // Leer todas las líneas del fichero y enviarlas como mensajes
             // A RELLENAR
+
+            //Para que los mensajes sean persistentes, se debe establecer el deliveryMode a 2 en las propiedades del mensaje.
+            AMQP.BasicProperties props = new AMQP.BasicProperties
+                                .Builder()
+                                .deliveryMode(2) 
+                                .build();
+
             for (String linea = br.readLine(); linea != null; linea = br.readLine()) {
-                channel.basicPublish("", NOMBRE_COLA, null, linea.getBytes());
+                channel.basicPublish("", NOMBRE_COLA, props, linea.getBytes());
                 System.out.println(" [x] Enviado '" + linea + "'");
             }
 

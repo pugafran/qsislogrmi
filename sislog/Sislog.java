@@ -79,7 +79,7 @@ class ReceptorEventos extends Thread {
                 }
             };
             System.out.println("ReceptorEventos. Esperando llegada de eventos");
-            channel.basicConsume(NOMBRE_COLA_RABBIT, true, consumer);
+            channel.basicConsume(NOMBRE_COLA_RABBIT, true, consumer); //Acuses de recibo automáticos de los mensajes recibidos por RabbitMQ (no se pierden mensajes)
         } catch (Exception e) {  // No manejamos excepciones, simplemente abortamos
             e.printStackTrace();
             System.exit(7);
