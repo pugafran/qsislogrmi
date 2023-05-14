@@ -10,6 +10,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include "filodist.h"
+#include <ctype.h>
 
 /* variables globales */
 // identificador del filósofo
@@ -96,15 +97,66 @@ int main(int argc, char *argv[])
   if (pthread_join(h1, NULL) != 0) // APARTADO 0.1
   {
     fprintf(stderr, "Filosofo %d: Falló al sincronizar con el hilo de comunicaciones\n", idfilo); // APARTADO 0.1
-    exit(16); // APARTADO 0.1
+    exit(16);                                                                                     // APARTADO 0.1
   }
 
   if (pthread_join(h2, NULL) != 0) // APARTADO 0.1
   {
     fprintf(stderr, "Filosofo %d: Falló al sincronizar con el hilo filosofo\n", idfilo); // APARTADO 0.1
-    exit(16); // APARTADO 0.1
+    exit(16);                                                                            // APARTADO 0.1
   }
   return 0;
+}
+
+int esEntero(char *cadena) // APARTADO 0.1
+{
+  while (*cadena != '\0')
+  {
+    if (!isdigit((unsigned char)*cadena))
+    {
+      return 0;
+    }
+    cadena++;
+  }
+
+  return 1;
+}
+
+int esIP(const char *ip)
+{ // APARTADO 0.1
+  // Crea una copia de la cadena para no modificar la original
+  char *copia = strdup(ip);
+
+  int segmentos = 0;                   // Contador de segmentos
+  char *segmento = strtok(copia, "."); // Divide la cadena en segmentos
+
+  while (segmento)
+  {
+    segmentos++;
+
+    // Verifica que el segmento es un número
+    for (int i = 0; segmento[i] != '\0'; i++)
+    {
+      if (segmento[i] < '0' || segmento[i] > '9')
+      {
+        free(copia);
+        return 0; // No es un número
+      }
+    }
+
+    // Convierte el segmento a un número y verifica que esté en el rango correcto
+    int num = atoi(segmento);
+    if (num < 0 || num > 255)
+    {
+      free(copia);
+      return 0; // No está en el rango correcto
+    }
+
+    segmento = strtok(NULL, ".");
+  }
+
+  free(copia);
+  return segmentos == 4; // Debe haber exactamente 4 segmentos
 }
 
 // procesa la linea de comandos, almacena los valores leidos en variables
@@ -124,12 +176,55 @@ void procesaLineaComandos(int numero, char *lista[])
   }
   else
   {
-    idfilo = atoi(lista[1]);
-    numfilo = atoi(lista[2]);
-    strcpy(siguiente_chain, lista[3]);
-    puerto_siguiente_chain = (unsigned short)atoi(lista[4]);
-    puerto_local = (unsigned short)atoi(lista[5]);
-    delay = atoi(lista[6]);
+    if (esEntero((lista[1])))
+      idfilo = atoi(lista[1]);
+    else
+    {
+      fprintf(stderr, "El id del filosofo debe ser un numero entero\n"); // APARTADO 0.1
+
+      exit(2); // APARTADO 0.1
+    }
+    if (esEntero((lista[2])))
+      numfilo = atoi(lista[2]);
+    else
+    {
+      fprintf(stderr, "El numero de filosofos debe ser un numero entero\n"); // APARTADO 0.1
+
+      exit(2); // APARTADO 0.1
+    }
+
+    if (esIP(lista[3]))
+      strcpy(siguiente_chain, lista[3]);
+    else
+    {
+      fprintf(stderr, "La IP siguiente debe ser una IP valida\n"); // APARTADO 0.1
+
+      exit(2); // APARTADO 0.1
+    }
+    if (esEntero((lista[4])))
+      puerto_siguiente_chain = (unsigned short)atoi(lista[4]);
+    else
+    {
+      fprintf(stderr, "El puerto siguiente debe ser un numero entero\n"); // APARTADO 0.1
+
+      exit(2); // APARTADO 0.1
+    }
+    if (esEntero((lista[5])))
+      puerto_local = (unsigned short)atoi(lista[5]);
+    else
+    {
+      fprintf(stderr, "El puerto local debe ser un numero entero\n"); // APARTADO 0.1
+
+      exit(2); // APARTADO 0.1
+    }
+    if (esEntero((lista[6])))
+      delay = atoi(lista[6]);
+    else
+    {
+      fprintf(stderr, "El delay debe ser un numero entero\n"); // APARTADO 0.1
+
+      exit(2); // APARTADO 0.1
+    }
     if ((numfilo < 2) || (numfilo > 8))
     {
       fprintf(stderr, "El numero de filosofos debe ser >=2 y <8\n");

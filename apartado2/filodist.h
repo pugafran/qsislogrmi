@@ -1,4 +1,4 @@
-#define MAX_BOCADOS 1
+#define MAX_BOCADOS 10
 
 typedef enum {
      no_sentado=0, queriendo_comer=1,
