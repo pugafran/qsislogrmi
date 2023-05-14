@@ -10,6 +10,8 @@ import javax.sound.sampled.Line;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
+
+//Import para poder hacer que los mensajes sean persistentes
 import com.rabbitmq.client.AMQP;
 
 

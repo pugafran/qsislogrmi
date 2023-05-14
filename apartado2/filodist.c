@@ -53,6 +53,7 @@ char msg[100]; // APARTADO 0.2
   13: error en el pthread_mutex_init
   14: error en el pthread_cond_init
   15: error en el pthread_cond_wait
+  16: error en el pthread_join
 
 */
 
@@ -103,8 +104,23 @@ int main(int argc, char *argv[])
   }
   // sincronización con la terminación del hilo de comunicaciones y el
   // hilo que ejecuta la función filósofo
-  pthread_join(h1, NULL);
-  pthread_join(h2, NULL);
+  if(pthread_join(h1, NULL) != 0)
+  {
+    sprintf(msg, "Filosofo %d: Falló al sincronizar con el hilo de comunicaciones\n", idfilo); // APARTADO 0.2
+    printlog(msg);                                                                              // APARTADO 0.2
+
+    exit(16);
+  }
+  
+  if(pthread_join(h2, NULL) != 0)
+  {
+    sprintf(msg, "Filosofo %d: Falló al sincronizar con el hilo filosofo\n", idfilo); // APARTADO 0.2
+    printlog(msg);                                                                     // APARTADO 0.2
+
+    exit(16);
+  }
+  
+  
   return 0;
 }
 
@@ -548,16 +564,10 @@ void alterarToken(unsigned char *tok, estado_filosofo nuevoestado)
     break;
   default:;
   case esperando_irse: // APARTADO 2
-    if (idfilo == 0 && ((*tok & 0x07) == 0x07))
+    if (idfilo == 0 && ((*tok & 0x07) == 0x07)) // si es el filosofo 0 y todos estan levantados (111)
     {
       *tok |= 0xFF; // 11111111
     }
-
-    /*
-        if ((*tok & 0xFF) == 0xFF) // si estan todos levantados (11111111) se van los demás
-        exit(0);
-      break;
-    */
     break;
   }
 }

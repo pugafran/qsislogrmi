@@ -7,4 +7,4 @@ fi
 echo "Lanzando el sislog"
 
 # Falta el & para que se ejecute en segundo plano
-java -cp clases:clases/rabbitmq-client.jar -Djava.security.policy=policy sislog.Sislog $1 $2 $3 $4 
+java -cp clases:clases/rabbitmq-client.jar -Djava.security.policy=policy sislog.Sislog $1 $2 $3 $4 &
